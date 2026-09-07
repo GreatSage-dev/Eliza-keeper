@@ -1,0 +1,38 @@
+{
+  "name": "eliza-keeper-bridge",
+  "version": "1.0.0",
+  "description": "Delegates all ElizaOS agent transaction execution to KeeperHub MCP — deterministic signing, gas management, MEV protection, audit trail",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "demo": "tsx scripts/demo.ts"
+  },
+  "keywords": [
+    "elizaos",
+    "keeperhub",
+    "mcp",
+    "agent",
+    "defi",
+    "transaction",
+    "signing",
+    "mev-protection"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "dotenv": "^16.4.0"
+  },
+  "peerDependencies": {
+    "@elizaos/core": ">=0.1.0"
+  },
+  "devDependencies": {
+    "@elizaos/core": "^0.1.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}
