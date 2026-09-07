@@ -9,7 +9,7 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "demo": "tsx scripts/demo.ts"
+    "demo": "npx tsx scripts/demo.ts"
   },
   "keywords": [
     "elizaos",
