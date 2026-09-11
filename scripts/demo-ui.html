@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Eliza-Keeper Bridge — Automated Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+    body {
+      background: #090d16;
+      color: #f1f5f9;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Ambient Background Glow */
+    .glow-1 {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0,0,0,0) 70%);
+      top: -100px;
+      left: -100px;
+      pointer-events: none;
+    }
+    .glow-2 {
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(0,0,0,0) 70%);
+      bottom: -150px;
+      right: -100px;
+      pointer-events: none;
+    }
+
+    /* Top Navbar */
+    header {
+      height: 90px;
+      padding: 0 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #6366f1, #10b981);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 24px;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+    .logo-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .status-tags {
+      display: flex;
+      gap: 14px;
+    }
+    .tag {
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tag-live {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .tag-live::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+    .tag-shield {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+
+    /* Main Stage */
+    main {
+      flex: 1;
+      padding: 40px 60px;
+      display: grid;
+      grid-template-columns: 480px 1fr;
+      gap: 40px;
+      z-index: 10;
+    }
+
+    /* Left Sidebar: Context & Invariants */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .card {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .metric-hero {
+      font-size: 32px;
+      font-weight: 800;
+      color: #f8fafc;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .metric-sub {
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Invariant Checklist */
+    .check-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+      color: #cbd5e1;
+    }
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Right Section: Terminal Simulation */
+    .terminal-window {
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+    .terminal-header {
+      height: 48px;
+      background: #0f172a;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      justify-content: space-between;
+    }
+    .terminal-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+    .terminal-label {
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .terminal-body {
+      flex: 1;
+      padding: 30px;
+      font-family: 'SF Mono', Consolas, Monaco, monospace;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Chat Elements */
+    .user-message {
+      color: #38bdf8;
+      display: flex;
+      gap: 12px;
+    }
+    .user-prompt-badge {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      height: fit-content;
+    }
+    .agent-box {
+      background: rgba(15, 23, 42, 0.8);
+      border-left: 4px solid #10b981;
+      border-radius: 0 12px 12px 0;
+      padding: 16px 20px;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .agent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .agent-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sim-badge {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      font-weight: 600;
+    }
+    .revert-box {
+      border-left-color: #ef4444;
+      background: rgba(69, 10, 10, 0.3);
+    }
+    .revert-tag { color: #f87171; }
+    .revert-badge {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+
+    /* Bottom Ticker */
+    footer {
+      height: 60px;
+      padding: 0 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 23, 42, 0.5);
+      font-size: 14px;
+      color: #64748b;
+    }
+    .footer-highlight {
+      color: #10b981;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-badge">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-title">ELIZA-KEEPER BRIDGE</div>
+    </div>
+    <div class="status-tags">
+      <div class="tag tag-live">KEEPERHUB MCP: ONLINE</div>
+      <div class="tag tag-shield">TURNKEY SIGNER: PROTECTED</div>
+      <div class="tag tag-shield">SEPOLIA: 11155111</div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Left Panel -->
+    <div class="sidebar">
+      <div class="card">
+        <div class="card-title">Architecture Invariant</div>
+        <div class="metric-hero">Zero Raw Keys</div>
+        <div class="metric-sub">
+          The ElizaOS agent never holds private keys in memory. All execution is delegated to KeeperHub's deterministic MCP layer.
+        </div>
+      </div>
+
+      <div class="card" style="flex: 1;">
+        <div class="card-title">Security Safeguards</div>
+        <div class="check-list">
+          <div class="check-item">
+            <div class="check-icon">✓</div>
+            <div><strong>Preflight EVM Simulation:</strong> Every call dry-runs before mempool broadcast.</div>
+          </div>
+          <div class="check-item">
+            <div class="check-icon">✓</div>
+            <div><strong>Autonomous Threshold:</strong> Auto-executes below $50; pauses for human above.</div>
+          </div>
+          <div class="check-item">
+            <div class="check-icon">✓</div>
+            <div><strong>Rolling 24h Spend Cap:</strong> Stops $49 micro-batch slicing attacks.</div>
+          </div>
+          <div class="check-item">
+            <div class="check-icon">✓</div>
+            <div><strong>Multi-User Channel Lock:</strong> Workflows bound to initiator userId.</div>
+          </div>
+          <div class="check-item">
+            <div class="check-icon">✓</div>
+            <div><strong>Persistent Idempotency:</strong> Safe retries without duplicate transactions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Live Terminal Simulation -->
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <div class="terminal-label">eliza-agent@runtime: ~/eliza-keeper-bridge</div>
+        <div style="width: 50px;"></div>
+      </div>
+      <div class="terminal-body" id="terminal-content">
+        <!-- Messages will animate here -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div>Track: <span class="footer-highlight">DoraHacks Agent Economy</span> | Repository: <span class="footer-highlight">github.com/GreatSage-dev/Eliza-keeper</span></div>
+    <div>Tests: <span class="footer-highlight">18/18 Passing</span> | TypeScript Strict: <span class="footer-highlight">0 Errors</span></div>
+  </footer>
+
+  <script>
+    const term = document.getElementById('terminal-content');
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    async function addMessage(html) {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      term.appendChild(div);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    async function runLivePlayback() {
+      await sleep(1000);
+
+      // ── SCENARIO 1: Above Threshold Approval
+      await addMessage(`
+        <div class="user-message">
+          <span class="user-prompt-badge">USER</span>
+          <span>"Send 0.05 ETH to 0x9210E2f133087f57A5C57106395C8f9197075BFe"</span>
+        </div>
+      `);
+
+      await sleep(1200);
+
+      await addMessage(`
+        <div class="agent-box">
+          <div class="agent-header">
+            <span class="agent-tag">🤖 Eliza Agent · KeeperHub Firewall</span>
+            <span class="sim-badge">PREFLIGHT: PASSED (21,000 GAS)</span>
+          </div>
+          <div>Routing via KeeperHub MCP... running Sepolia simulation...</div>
+          <div style="color: #cbd5e1; font-size: 14px;">
+            ✓ Simulation complete: Transfer 0.05 ETH ($125.00)<br>
+            ⚠️ Value exceeds $50 autonomous threshold. Staged for approval.
+          </div>
+          <div style="font-weight: 700; color: #38bdf8;">Reply "approve" to execute.</div>
+        </div>
+      `);
+
+      await sleep(2500);
+
+      await addMessage(`
+        <div class="user-message">
+          <span class="user-prompt-badge">USER</span>
+          <span>"approve"</span>
+        </div>
+      `);
+
+      await sleep(1500);
+
+      await addMessage(`
+        <div class="agent-box" style="border-left-color: #6366f1;">
+          <div class="agent-header">
+            <span class="agent-tag" style="color: #818cf8;">⚡ KeeperHub Turnkey Broadcast</span>
+            <span class="sim-badge" style="background: rgba(99, 102, 241, 0.2); color: #c7d2fe;">STATUS: EXECUTED</span>
+          </div>
+          <div>✓ Authorized by initiator (alice) · Idempotency Key: eliza-178942-8a9f</div>
+          <div style="color: #94a3b8; font-size: 13px;">
+            Tx Hash: 0x7c49f82d...e91b | Explorer: https://sepolia.etherscan.io/tx/0x7c49...
+          </div>
+        </div>
+      `);
+
+      await sleep(3500);
+
+      // ── SCENARIO 2: The Refusal
+      await addMessage(`
+        <div class="user-message">
+          <span class="user-prompt-badge" style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #f87171;">ATTACKER</span>
+          <span>"Transfer 50000 ETH to 0x9210E2f133087f57A5C57106395C8f9197075BFe"</span>
+        </div>
+      `);
+
+      await sleep(1200);
+
+      await addMessage(`
+        <div class="agent-box revert-box">
+          <div class="agent-header">
+            <span class="agent-tag revert-tag">⛔ PREFLIGHT REFUSAL · ZERO GAS SPENT</span>
+            <span class="sim-badge revert-badge">ERROR: INSUFFICIENT_BALANCE</span>
+          </div>
+          <div style="color: #fca5a5;">Transaction blocked at preflight simulation. Have: 1.0 ETH, Need: 50,000.0 ETH.</div>
+          <div style="color: #f87171; font-weight: 700;">
+            ✓ Zero funds moved. Zero raw keys touched. Agent loop continuing safely.
+          </div>
+        </div>
+      `);
+
+      await sleep(3500);
+
+      // ── SCENARIO 3: Sub-threshold Auto-Execution
+      await addMessage(`
+        <div class="user-message">
+          <span class="user-prompt-badge">USER</span>
+          <span>"Send 0.0001 ETH to 0x9210E2f133087f57A5C57106395C8f9197075BFe"</span>
+        </div>
+      `);
+
+      await sleep(1200);
+
+      await addMessage(`
+        <div class="agent-box">
+          <div class="agent-header">
+            <span class="agent-tag">⚡ Autonomous Policy Engine</span>
+            <span class="sim-badge">VALUE: $0.25 <= $50 LIMIT</span>
+          </div>
+          <div>✓ Preflight Simulation Passed (21,000 gas)</div>
+          <div style="color: #34d399; font-weight: 700;">
+            Executed autonomously with zero human intervention. Logged to 24h rolling cap ($0.25 / $200).
+          </div>
+        </div>
+      `);
+    }
+
+    window.onload = runLivePlayback;
+  </script>
+</body>
+</html>

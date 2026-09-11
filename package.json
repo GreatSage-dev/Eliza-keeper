@@ -9,7 +9,8 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "demo": "npx tsx scripts/demo.ts"
+    "demo": "npx tsx scripts/demo.ts",
+    "record": "npx tsx scripts/record-demo.ts"
   },
   "keywords": [
     "elizaos",
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@elizaos/core": "^0.1.0",
     "@types/node": "^22.0.0",
+    "playwright-core": "^1.63.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   }
